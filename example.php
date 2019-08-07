@@ -4,7 +4,9 @@ include "./class.php";
 
 $stats = new Stats();
 
-$stats  ->get_cpu()
+$stats  
+        ->get_uptime()
+        ->get_cpu()
         ->get_mem()
         ->get_disk();
 

@@ -64,5 +64,12 @@ class Stats {
         return $this;
     }
 
+    function get_uptime() {
+        $uptime = exec('uptime | cut -d "," -f 1,2');
+
+        $this->output['uptime'] = $uptime;
+        return $this;
+    }
+
 
 }
