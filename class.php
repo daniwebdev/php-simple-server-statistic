@@ -5,8 +5,26 @@ class Stats {
     public $output = [];
 
     function get_cpu() {
-        $cpu = sys_getloadavg()[0];
-        $this->output['cpu'] = $cpu."%";
+
+        $e = shell_exec("sar -u 1 1");
+        $e = explode("\n", $e);
+        $e = explode(' ', $e[4]); //get average;
+        // $get_end = end($e);
+        $avg    = [];
+        $total  = 0;
+        
+        $end = end($e);
+        
+        foreach($e as $k => $v) {
+            if($k > 10 && $v != $end) {
+                if(!empty($v)) {
+                    $double = (double) str_replace(',', '.', $v);
+                    $avg[]  = $double;
+                    $total += $double;
+                }
+            }
+        }
+        $this->output['cpu'] = $total;
 
         return $this;
     }
@@ -34,11 +52,22 @@ class Stats {
                 $this->output['memory'][$item] = $mem[$key];
             }
         }
+
+        $free = shell_exec('free');
+        $free = (string)trim($free);
+        $free = explode("\n", $free);
+        $mem  = $this->get_free($free[1]);
+        
+        foreach($this->get_free($free[0]) as $key => $item) {
+            if($key > 0) {
+                $this->output['memory_b'][$item] = $mem[$key];
+            }
+        }
         return $this;
     }
 
     function get_disk() {
-        $df = shell_exec("df -lh");
+        $df = shell_exec("df -l");
         $df = (string)trim($df);
         $df = explode("\n", $df);
         $data_df = [];
@@ -50,15 +79,17 @@ class Stats {
                     $g_temp[] = $dat;
                 }
             }
-            $out['file_sistem']     = $g_temp[0];
-            $out['size']            = $g_temp[1];
-            $out['used']            = $g_temp[2];
-            $out['avail']           = $g_temp[3];
-            $out['used_percent']    = $g_temp[4];
-            $out['mounted_on']      = $g_temp[5];
-            $data_df[] = $out;
+            if($g_temp[0] != 'Filesystem') {
+                $out['file_sistem']     = $g_temp[0];
+                $out['size']            = $g_temp[1];
+                $out['used']            = $g_temp[2];
+                $out['avail']           = $g_temp[3];
+                $out['used_percent']    = $g_temp[4];
+                $out['mounted_on']      = $g_temp[5];
+                $data_df[] = $out;
+            }
         }
-        unset($data_df[0]);
+
         $this->output['disk'] = $data_df;
         
         return $this;

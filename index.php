@@ -10,6 +10,6 @@ $stats
         ->get_mem()
         ->get_disk();
 
-$json = json_encode($stats->output);
+// $json = json_encode($stats->output);
 header("content-type: application/json");
-echo $json;
+echo json_encode($stats->output);
